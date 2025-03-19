@@ -13,10 +13,10 @@ static struct winsize term_size;
 static char input_buffer[BUFFER_SIZE];
 static char output_buffer[BUFFER_SIZE];
 
-static uint32_t camera_x = UINT32_MAX / 2 - 3;
-static uint32_t camera_y = UINT32_MAX / 2 - 1;
 static uint32_t origin_x = UINT32_MAX / 2;
 static uint32_t origin_y = UINT32_MAX / 2;
+static uint32_t camera_x = UINT32_MAX / 2 - 3;
+static uint32_t camera_y = UINT32_MAX / 2 - 1;
 
 static int game_exit = 0;
 
@@ -68,6 +68,8 @@ void output_update() {
             uint32_t world_y = camera_y - y + term_size.ws_row / 2;
             if (world_x == origin_x && world_y == origin_y) {
                 strcat(output_buffer, "O");
+            } else if (world_x == camera_x && world_y == camera_y) {
+                strcat(output_buffer, "+");
             } else {
                 strcat(output_buffer, ".");
             }
