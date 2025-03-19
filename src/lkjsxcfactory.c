@@ -23,14 +23,6 @@ void term_init() {
     tcsetattr(STDIN_FILENO, TCSAFLUSH, &term_new);
 }
 
-void deinit() {
-    term_deinit();
-}
-
-void init() {
-    term_init();
-}
-
 void run() {
     char c;
     while (1) {
@@ -42,6 +34,14 @@ void run() {
             }
         }
     }
+}
+
+void deinit() {
+    term_deinit();
+}
+
+void init() {
+    term_init();
 }
 
 int main() {
