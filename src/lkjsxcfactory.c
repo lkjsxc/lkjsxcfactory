@@ -22,7 +22,7 @@ enum blocktype {
 
 struct block {
     enum blocktype type;
-    uint32_t count;
+    uint16_t count;
 };
 
 struct block_table {
@@ -52,6 +52,7 @@ static struct block_task {
 static uint32_t block_task_size = 0;
 
 static int game_exit = 0;
+static uint64_t game_tick = 0;
 static uint32_t origin_x = WORLD_WIDTH / 2;
 static uint32_t origin_y = WORLD_WIDTH / 2;
 static uint32_t camera_x = WORLD_WIDTH / 2 - 3;
@@ -63,49 +64,49 @@ struct block_table block_table[] = {
         .rotate_next = blocktype_air,
         .rotate_prev = blocktype_air,
         .name = "Air",
-        .symbol = " ",
+        .symbol = "\e[37;40m ",
     },
     [blocktype_matter] = {
         .type = blocktype_matter,
         .rotate_next = blocktype_matter,
         .rotate_prev = blocktype_matter,
         .name = "Matter",
-        .symbol = "M",
+        .symbol = "\e[37;41mM",
     },
     [blocktype_matter_ore] = {
         .type = blocktype_matter_ore,
         .rotate_next = blocktype_matter_ore,
         .rotate_prev = blocktype_matter_ore,
         .name = "Matter Ore",
-        .symbol = "O",
+        .symbol = "\e[37;43mO",
     },
     [blocktype_inserter_north] = {
         .type = blocktype_inserter_north,
         .rotate_next = blocktype_inserter_east,
         .rotate_prev = blocktype_inserter_west,
         .name = "Inserter North",
-        .symbol = "↑",
+        .symbol = "\e[37;44m^",
     },
     [blocktype_inserter_east] = {
         .type = blocktype_inserter_east,
         .rotate_next = blocktype_inserter_south,
         .rotate_prev = blocktype_inserter_north,
         .name = "Inserter East",
-        .symbol = "→",
+        .symbol = "\e[37;44m>",
     },
     [blocktype_inserter_south] = {
         .type = blocktype_inserter_south,
         .rotate_next = blocktype_inserter_west,
         .rotate_prev = blocktype_inserter_east,
         .name = "Inserter South",
-        .symbol = "↓",
+        .symbol = "\e[37;44mv",
     },
     [blocktype_inserter_west] = {
         .type = blocktype_inserter_west,
         .rotate_next = blocktype_inserter_north,
         .rotate_prev = blocktype_inserter_south,
         .name = "Inserter West",
-        .symbol = "←",
+        .symbol = "\e[37;44m<",
     },
 };
 
@@ -145,6 +146,7 @@ void world_update_block(uint32_t x, uint32_t y) {
 }
 
 void world_update() {
+    game_tick += 1;
     block_task_size = 0;
     for (uint32_t chunk_y = 0; chunk_y < WORLD_WIDTH / CHUNK_WIDTH; ++chunk_y) {
         for (uint32_t chunk_x = 0; chunk_x < WORLD_WIDTH / CHUNK_WIDTH; ++chunk_x) {
@@ -194,16 +196,68 @@ void input_update() {
 
 void output_update() {
     strcpy(output_buffer, "\033[2J\033[1;1H");
-
     for (uint32_t y = 0; y < term_size.ws_row; ++y) {
-        for (uint32_t x = 0; x < term_size.ws_col; ++x) {
-            uint32_t world_x = camera_x + x - term_size.ws_col / 2;
+        for (uint32_t x = 0; x < term_size.ws_col / 2; ++x) {
+            uint32_t world_x = camera_x + x - term_size.ws_col / 4;
             uint32_t world_y = camera_y - y + term_size.ws_row / 2;
             struct block* block = world_get(world_x, world_y);
-            if (world_x == camera_x && world_y == camera_y) {
-                strcat(output_buffer, "+");
-            } else {
-                strcat(output_buffer, block_table[block->type].symbol);
+            if (world_x == camera_x && world_y == camera_y && game_tick % 10 < 5) {
+                strcat(output_buffer, "\e[37;40m++");
+                continue;
+            }
+            strcat(output_buffer, block_table[block->type].symbol);
+            switch (block->count) {
+                case 0:
+                    strcat(output_buffer, " ");
+                    break;
+                case 1:
+                    strcat(output_buffer, "1");
+                    break;
+                case 2:
+                    strcat(output_buffer, "2");
+                    break;
+                case 3:
+                    strcat(output_buffer, "3");
+                    break;
+                case 4:
+                    strcat(output_buffer, "4");
+                    break;
+                case 5:
+                    strcat(output_buffer, "5");
+                    break;
+                case 6:
+                    strcat(output_buffer, "6");
+                    break;
+                case 7:
+                    strcat(output_buffer, "7");
+                    break;
+                case 8:
+                    strcat(output_buffer, "8");
+                    break;
+                case 9:
+                    strcat(output_buffer, "9");
+                    break;
+                case 10:
+                    strcat(output_buffer, "a");
+                    break;
+                case 11:
+                    strcat(output_buffer, "b");
+                    break;
+                case 12:
+                    strcat(output_buffer, "c");
+                    break;
+                case 13:
+                    strcat(output_buffer, "d");
+                    break;
+                case 14:
+                    strcat(output_buffer, "e");
+                    break;
+                case 15:
+                    strcat(output_buffer, "f");
+                    break;
+                default:
+                    strcat(output_buffer, "X");
+                    break;
             }
         }
     }
